@@ -1,0 +1,15 @@
+# Python e Django
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+db.sqlite3-journal
+.env
+.DS_Store
+
+# Virtualenv
+venv/
+env/
+
+# Logs e caches
+*.log
