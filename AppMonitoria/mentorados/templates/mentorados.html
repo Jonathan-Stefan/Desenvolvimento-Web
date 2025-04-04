@@ -18,10 +18,8 @@
             </button>
         </div>
         <div class="hidden lg:flex lg:gap-x-12">
-            <a href="#" class="text-sm font-semibold text-gray-100">Mentorados</a>
-            <a href="#" class="text-sm font-semibold text-gray-100">Tarefas</a>
-            <a href="#" class="text-sm font-semibold text-gray-100">Progressos</a>
-            <a href="#" class="text-sm font-semibold text-gray-100">Navigators</a>
+            <a href="{%url 'mentorados' %}" class="text-sm font-semibold text-gray-100">Mentorados</a>
+            <a href="{%url 'reunioes' %}" class="text-sm font-semibold text-gray-100">Reuniões</a>
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end"></div>
     </nav>
@@ -104,7 +102,7 @@
                             <td class="py-4 pl-4 pr-8">
                                 <div class="flex items-center gap-x-4">
                                     <img src="{{mentorado.foto.url}}" alt="" class="size-8 rounded-full bg-gray-800">
-                                    <div class="truncate text-sm font-medium text-white">{{mentorado.nome}}                                      
+                                    <div class="truncate text-sm font-medium text-white"><a href="{% url 'tarefa' mentorado.id %}">{{mentorado.nome}}</a>                                  
                                     </div>
                                 </div>
                             </td>
@@ -131,4 +129,23 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: {{estagios_flat|safe}},
+      datasets: [{
+        label: '',
+        data: {{qtd_estagios|safe}},
+        borderWidth: 1
+      }]
+    },
+    
+  });
+</script>
 {% endblock 'body' %}
