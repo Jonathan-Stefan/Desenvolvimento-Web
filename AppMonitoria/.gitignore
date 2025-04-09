@@ -13,3 +13,6 @@ env/
 
 # Logs e caches
 *.log
+
+midia/fotos/
+midia/video/

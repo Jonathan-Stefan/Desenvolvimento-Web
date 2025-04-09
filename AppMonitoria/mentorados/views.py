@@ -7,16 +7,18 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from . auth import valida_token
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-
-@login_required
 def mentorados(request):
+    if not request.user.is_authenticated:
+        return redirect('login') 
 
     if request.method == 'GET':
         navigators = Navigators.objects.filter(user=request.user)
         mentorados = Mentorados.objects.filter(user=request.user)
+        
 
         estagios_flat = [i[1] for i in Mentorados.estagio_choices]
+        tokens = [i.token for i in Mentorados.objects.filter(user=request.user)]
+        
 
         qtd_estagios = []
         for i, j in Mentorados.estagio_choices:
@@ -24,16 +26,18 @@ def mentorados(request):
             qtd_estagios.append(x)
             print(qtd_estagios)
 
-        return render(request, 'mentorados.html', {'estagios': Mentorados.estagio_choices, 'navigators': navigators, 'mentorados': mentorados, 'estagios_flat': estagios_flat, 'qtd_estagios': qtd_estagios})
+        return render(request, 'mentorados.html', {'estagios': Mentorados.estagio_choices, 'navigators': navigators, 'mentorados': mentorados, 'estagios_flat': estagios_flat, 'qtd_estagios': qtd_estagios, 'token': tokens})
 
     elif request.method == 'POST':
         nome = request.POST.get('nome')
+        senha = request.POST.get('senha')
         foto = request.FILES.get('foto')
         estagio = request.POST.get('estagio')
         navigator = request.POST.get('navigator')
 
         mentorado = Mentorados(
             nome=nome,
+            senha=senha,
             foto=foto,
             estagio=estagio,    
             navigator_id=navigator,
@@ -98,13 +102,19 @@ def escolher_dia(request):
             mentor = mentorado.user
         ).values_list('data_inicial', flat=True)
         datas = []
+        dias = []
+        meses = []
         for i in disponibilidades:
             datas.append(i.date().strftime('%d-%m-%Y'))
+            dias.append(i.strftime('%A'))
+            meses.append(i.strftime('%B'))
+        
+        dias_meses_horarios = zip(datas, dias , meses)
+            
 
-        #deixar o dia e o mes dinamico
-
-
-        return render(request, 'escolher_dia.html', {'horarios': list(set(datas))})
+        return render(request, 'escolher_dia.html', {
+            'dias_meses_horarios':sorted(set(dias_meses_horarios)),
+        })
 
 def agendar_reuniao(request):
     if not valida_token(request.COOKIES.get('auth_token')):
@@ -112,12 +122,9 @@ def agendar_reuniao(request):
 
     mentorado = valida_token(request.COOKIES.get('auth_token'))
 
-    #TODO: Verificar se o horario escolhido é realmente de um mentor do mentorado
-
     if request.method == 'GET':
         data = request.GET.get('data')
-        data = datetime.strptime(data, '%d-%m-%Y')
-        
+        data = datetime.strptime(data, '%d-%m-%Y')            
 
         horarios = DisponibilidadeHorario.objects.filter(
             data_inicial__gte = data,
@@ -184,8 +191,6 @@ def tarefa_mentorado(request):
         tarefas = Tarefa.objects.filter(mentorado=mentorado)
         return render(request, 'tarefa_mentorado.html', {'mentorado': mentorado, 'videos': videos, 'tarefas': tarefas})
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
 
 @csrf_exempt
 def tarefa_alterar(request, id):
@@ -195,3 +200,18 @@ def tarefa_alterar(request, id):
     tarefa.save()
 
     return HttpResponse('teste')
+
+def navigators(request):
+    mentor =request.user
+
+    if request.method == 'GET':
+        return render(request, 'navigators.html')    
+
+    elif request.method == 'POST':
+        nome = request.POST.get('nome')
+        navigator = Navigators(nome = nome, user = mentor)
+        navigator.save()
+        print(navigator)
+
+        messages.add_message(request, constants.SUCCESS, 'Monitor cadastrado com sucesso')
+        return redirect('mentorados')

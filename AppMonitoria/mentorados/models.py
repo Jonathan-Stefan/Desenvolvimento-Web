@@ -15,6 +15,7 @@ class Mentorados(models.Model):
         ('E2', '100-1KK')
     )
     nome = models.CharField(max_length=255)
+    senha = models.CharField(max_length=20)
     foto = models.ImageField(upload_to='fotos', null=True, blank=True)
     estagio = models.CharField(max_length=2, choices=estagio_choices)
     navigator = models.ForeignKey(Navigators, null=True, blank=True, on_delete=models.SET_NULL)

@@ -5,6 +5,8 @@ from django.contrib.messages import constants
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib import auth
+from mentorados.auth import valida_token
+from mentorados.models import Mentorados
 
 def cadastro(request):
     if request.method == 'GET':
@@ -38,11 +40,18 @@ def login(request):
     elif request.method == 'POST':
         username = request.POST.get('username')
         senha = request.POST.get('senha')
+        token = valida_token(request.COOKIES.get('auth_token'))
+
+        mentorado = Mentorados.objects.filter(nome=username, senha=senha).first()
+        if mentorado:
+            if mentorado.token != token:
+                return redirect('auth_mentorado') 
+            return redirect('tarefa_mentorado')
 
         user = authenticate(request, username=username, password=senha)
         if user:
             auth.login(request, user)
-            return redirect('mentorados')
+            return redirect('mentorados')            
 
         messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos')    
         return render(request, 'login.html')

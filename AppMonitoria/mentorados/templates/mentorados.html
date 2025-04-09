@@ -20,8 +20,15 @@
         <div class="hidden lg:flex lg:gap-x-12">
             <a href="{%url 'mentorados' %}" class="text-sm font-semibold text-gray-100">Mentorados</a>
             <a href="{%url 'reunioes' %}" class="text-sm font-semibold text-gray-100">Reuniões</a>
-        </div>
+            <a href="{%url 'navigators' %}" class="text-sm font-semibold text-gray-100">Monitor</a>
+        </div>        
         <div class="hidden lg:flex lg:flex-1 lg:justify-end"></div>
+        <div class="flex items-center justify-end">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="text-sm font-semibold text-gray-100">Logout</button>
+            </form>
+        </div>
     </nav>
 </header>
 <div class="bg-[#040e1b] min-h-screen">
@@ -46,6 +53,12 @@
                             <input type="text" name="nome" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white placeholder:text-gray-500">
                         </div>
                     </div>
+                    <div>
+                        <label for="senha" class="block text-sm font-medium text-gray-200">Senha</label>
+                        <div class="mt-2">
+                            <input type="text" name="senha" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white placeholder:text-gray-500">
+                        </div>
+                    </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-200">Foto</label>
@@ -65,11 +78,11 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-200">Navigator</label>
+                        <label class="block text-sm font-medium text-gray-200">Monitor</label>
                         <div class="mt-2">
                             <select name="navigator" class="block w-full rounded-md bg-white/5 px-3 py-2 text-base text-white">
                                 {% for navigator in navigators%}
-                                    <option value="{{navigator.id}}">{{navigator.nome}}</option>
+                                    <option class="text-slate-900" value="{{navigator.id}}">{{navigator.nome}}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -93,7 +106,8 @@
                         <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">Estágio</th>
                         <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left">Status</th>
                         <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell">Data entrada</th>
-                        <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell">Navigator</th>
+                        <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell">Mentor</th>
+                        <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell">Token</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
@@ -122,6 +136,7 @@
                             </td>
                             <td class="hidden py-4 pl-0 pr-8 text-sm text-gray-400 md:table-cell">{{mentorado.criado_em}}</td>
                             <td class="hidden py-4 pl-0 pr-8 text-sm text-gray-400 md:table-cell">{{mentorado.navigator}}</td>
+                            <td class="hidden py-4 pl-0 pr-8 text-sm text-gray-400 md:table-cell">{{mentorado.token}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -129,12 +144,10 @@
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
   const ctx = document.getElementById('myChart');
-
   new Chart(ctx, {
     type: 'pie',
     data: {
@@ -144,8 +157,7 @@
         data: {{qtd_estagios|safe}},
         borderWidth: 1
       }]
-    },
-    
+    },    
   });
 </script>
 {% endblock 'body' %}
